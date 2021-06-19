@@ -102,17 +102,23 @@ function getMostPopularAuthors(books, authors) {
     // The following doesn't account for authors having multiple books
     // authorId 20 in the book fixture as two books. The tests may be passing
     // becasue my sort function is slicing off the duplicate entry
-    const authorsByBorrowsArray = books.reduce((acc, { authorId, borrows }) => {
-	const count = borrows.length;
-	const entry = [authorId,count];
-	acc.push(entry);
-	return acc;
-    },[]);
-
-    // Uncomment this console log to see the duplicate authorId's
     //
-    //console.log(authorByBorrowsArray);
-    
+    // const authorsByBorrowsArray = books.reduce((acc, { authorId, borrows }) => {
+    // 	const count = borrows.length;
+    // 	const entry = [authorId,count];
+    // 	acc.push(entry);
+    // 	return acc;
+    // },[]);
+
+    const  authorsByBorrowsObject = books.reduce((acc, { authorId, borrows }) => {
+	const count = borrows.length
+	acc[authorId]
+	    ? acc[authorId] += count
+	    : acc[authorId] = count
+	return acc;
+    },{});
+
+    const authorsByBorrowsArray = Object.entries(authorsByBorrowsObject);    
     const sortedEntriesArray = _topFiveSortedBookOrAuthorEntriesArray(authorsByBorrowsArray);
 
     return sortedEntriesArray.map((entry) => {
@@ -129,8 +135,8 @@ function getMostPopularAuthors(books, authors) {
     });
 }
 
-// const test_getMostPopularAuthors = getMostPopularAuthors(books,authors);
-// console.log(test_getMostPopularAuthors);
+const test_getMostPopularAuthors = getMostPopularAuthors(books,authors);
+console.log(test_getMostPopularAuthors);
 
 module.exports = {
     getTotalBooksCount,
