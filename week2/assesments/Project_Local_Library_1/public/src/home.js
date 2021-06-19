@@ -52,13 +52,43 @@ function _mapBookOrAuthorEntriesToObjects(bookOrAuthorArray) {
     // Consumes an array of arrays and converts
     // each element to an object, returning a new
     // array of objects
+    //
+    //==========================================================================
     return bookOrAuthorArray.map((elem) => {
 	      const name = elem[0];
 	      const count = elem[1];
 	      const object = { name, count };
 
 	      return object;
-	  });
+    });
+    //==========================================================================
+    //
+    //    Trying to generalize over comparing entries in one list vs
+    //     entries in two lists.
+    //
+    //    Above maps [ name, count] -> { name: name, count: count } ...
+    //     from within the same list
+    //
+    //    Below maps [ name, count ] -> { name: name, count: count } ...
+    //     but uses 'authorId' and 'id' as foreign keys in two
+    //     dissimilar lists.
+    //
+    //==========================================================================
+    return sortedEntriesArray.map((entry) => {
+	let object = {};
+	authors.forEach(({ id, name: { first, last } }) => {
+	    const authorId = Number(entry[0]);
+	    const count = entry[1];
+	    
+	    if (authorId === id) {
+		object.name =`${first} ${last}`;
+		object.count = count;
+		return object;
+	    }
+	});
+	return object;
+    });
+    //==========================================================================
 }
 
 function getMostCommonGenres(books) {
@@ -118,16 +148,21 @@ function getMostPopularAuthors(books, authors) {
 	return acc;
     },{});
 
-    const authorsByBorrowsArray = Object.entries(authorsByBorrowsObject);    
+    const authorsByBorrowsArray = Object.entries(authorsByBorrowsObject);
+    console.log(authorsByBorrowsArray);
+    
     const sortedEntriesArray = _topFiveSortedBookOrAuthorEntriesArray(authorsByBorrowsArray);
+    console.log(sortedEntriesArray);
 
     return sortedEntriesArray.map((entry) => {
+	let object = {};
 	authors.forEach(({ id, name: { first, last } }) => {
-	    const authorId = entry[0];
+	    const authorId = Number(entry[0]);
 	    const count = entry[1];
 	    
 	    if (authorId === id) {
-		object = { name:`${first} ${last}`, count };
+		object.name =`${first} ${last}`;
+		object.count = count;
 		return object;
 	    }
 	});
