@@ -1,30 +1,15 @@
-const accounts = require("../../test/fixtures/accounts.fixture");
-const authors = require("../../test/fixtures/authors.fixture");
-const books = require("../../test/fixtures/books.fixture");
-
-
 function findAuthorById(authors, id) {
     // function(array, number) -> object
     // - consumes: authorsArray, authorID
     // - returns: authorObject === authorID
-    const authorById = authors.find((author) => {
-	let authorId = author.id;
-	return id === authorId;
-    });    
-
-    return authorById;
+    return authorById = authors.find((author) => author.id === id);
 }
 
 function findBookById(books, id) {
     // function(array, string) -> object
     // - consumes: booksArray, bookId
     // - returns: bookObject === bookId
-    const bookById = books.find((book) => {
-	let bookId = book.id;
-	return id === bookId;
-    });
-
-    return bookById;
+    return bookById = books.find((book) => book.id === id);
 }
 
 function partitionBooksByBorrowedStatus(books) {
@@ -32,11 +17,11 @@ function partitionBooksByBorrowedStatus(books) {
     // - consumes: booksArray
     // - returns: partitionedByBorrowedArray:[ [isBookNotReturned],[isBooksReturned] ]
     const partitionByBorrowedState = books.reduce((acc,book) => {
-	let bookBorrowedHistory = book.borrows;
-	let bookBorrowedStateEntry = bookBorrowedHistory[0];
-	let bookBorrowedStatus = bookBorrowedStateEntry.returned;
-	let isBookReturned = acc[1];
-	let isBookNotReturned = acc[0];
+	const bookBorrowedHistory = book.borrows;
+	const bookBorrowedStateEntry = bookBorrowedHistory[0];
+	const bookBorrowedStatus = bookBorrowedStateEntry.returned;
+	const isBookReturned = acc[1];
+	const isBookNotReturned = acc[0];
 	
 	bookBorrowedStatus === true
 	    ? isBookReturned.push(book)
@@ -54,10 +39,10 @@ function getBorrowersForBook(book, accounts) {
     // - returns: accountsWithBookBorrowedStatusArray
     const bookBorrowHistory = book.borrows;
     const accountsByBookBorrowedState = accounts.reduce((acc,account) => {
-	let accountId = account.id;
+	const accountId = account.id;
 	bookBorrowHistory.forEach((borrow) => {
-	    let borrowId = borrow.id;
-	    let borrowedState = borrow.returned;
+	    const borrowId = borrow.id;
+	    const borrowedState = borrow.returned;
 	    if (accountId === borrowId) {
 		account.returned = borrowedState;
 		acc.push(account);

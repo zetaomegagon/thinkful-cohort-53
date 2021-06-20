@@ -1,7 +1,3 @@
-const accounts = require("../../test/fixtures/accounts.fixture");
-const authors = require("../../test/fixtures/authors.fixture");
-const books = require("../../test/fixtures/books.fixture");
-
 function findAccountById(accounts, id) {
     // function(array,string) -> object
     // - consumes: accountsArray, accountId
@@ -46,6 +42,7 @@ function getTotalNumberOfBorrows(account, books) {
     return bookBorrowedTimesByAccountId;
 }
 
+// HELPER FUNCTION
 function _includedInBorrowEntryObject(borrowedEntryObject, idOrBorrowedState) {
     // function(object, string|true|false) -> bool
     // - consumes: borrowEntryObject, accountId|borrowedStateValue

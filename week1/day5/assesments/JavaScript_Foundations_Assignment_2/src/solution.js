@@ -11,42 +11,56 @@
    
   When any of the following function's parameters reference `product`, they are referencing an object with the above shape.
 */
-
 function printablePrice(priceInCents) {
-    if (price === 0) { return 0; }
-    
-    const toCents = (priceInCents / 100).toFixed(2);
-    return `$${toCents}`;
+  const amount = (priceInCents / 100).toFixed(2);
+  return `$${amount}`;
 }
-
 
 function chooseItemByNameAndSize(products, name, size) {
-    let product = null
-
-    if (products == []) { return product; }
-
-    for (let i = 0; i < products.length; i++) {
-	let productIth = product[i];
-	let productName = productIth.name;
-	let productSize = productIth.availableSizes;
-	
-	
-	if (productName === name) {
-	    if (productSize === size) {
-		let product = productIth;
-		return product;
-		}
-	    }
-	}
+  let selected = null;
+  for (let i = 0; i < products.length; i++) {
+    const product = products[i];
+    if (product.name === name && product.availableSizes.includes(size)) {
+      selected = product;
     }
-    return product;
+  }
+  return selected;
 }
 
-function addProductToCart() {}
+function addProductToCart({ name, priceInCents }, cart = {}) {
+  const selected = cart[name];
+  if (selected) {
+    selected.quantity++;
+  } else {
+    cart[name] = { priceInCents, quantity: 1 };
+  }
 
-function calculateTotal() {}
+  return cart;
+}
 
-function printReceipt() {}
+function calculateTotal(cart) {
+  let result = 0;
+  for (let name in cart) {
+    const item = cart[name];
+    result += item.quantity * item.priceInCents;
+  }
+  return result;
+}
+
+function printReceipt(cart) {
+  const total = calculateTotal(cart);
+  if (!total) return null;
+
+  let result = "";
+  for (let name in cart) {
+    const { quantity, priceInCents } = cart[name];
+    const amount = printablePrice(quantity*priceInCents);
+    result += `${quantity}x${name} - ${amount}\n`;
+  }
+
+  return result + `Total: ${printablePrice(total)}`;
+}
+
 
 module.exports = {
   chooseItemByNameAndSize,

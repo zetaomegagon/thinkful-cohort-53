@@ -1,7 +1,3 @@
-const accounts = require("../../test/fixtures/accounts.fixture");
-const authors = require("../../test/fixtures/authors.fixture");
-const books = require("../../test/fixtures/books.fixture");
-
 function getTotalBooksCount(books) {
     // function(array) -> number
     // - consumes: booksArray
@@ -23,10 +19,11 @@ function getBooksBorrowedCount(books){
     return books.filter(({ borrows }) => borrows[0].returned === false).length;
 }
 
+// HELPER FUNCTION
 function _topFiveSortedBookOrAuthorEntriesArray(bookOrAuthorArray) {
     // function(arrayOfArrays) -> arrayOfArrays
-    // - consumes: bookOrAuthorArray
-    // - returns: sortedBookOrAuthorArray
+    // - consumes: bookOrAuthorArrayOfArrays
+    // - returns: sortedBookOrAuthorArrayOfArrays
     //
     //   [ [ B, 1 ], [ A, 2 ], ...arrElemN ] ->
     //
@@ -40,10 +37,11 @@ function _topFiveSortedBookOrAuthorEntriesArray(bookOrAuthorArray) {
     }).slice(0,5);
 }
 
-function _mapBookOrAuthorEntriesToObjects(bookOrAuthorArray) {
-    // functon(arrayOfArrays) -> arrayOfObjects
-    // - consumes: bookOrAuthorArray
-    // - returns: sortedBookOrAuthorArray
+// HELPER FUNCTION
+function _mapBookOrAuthorEntriesToObjects(books, authors = []) {
+    // function(arrayOfArrays) -> arrayOfObjects
+    // - consumes: bookOrAuthorArrayOfArrays
+    // - returns: bookOrAuthorArrayOfObjects
     //
     //   [ [ tag, count], ...arrN ] ->
     //
@@ -52,30 +50,19 @@ function _mapBookOrAuthorEntriesToObjects(bookOrAuthorArray) {
     // Consumes an array of arrays and converts
     // each element to an object, returning a new
     // array of objects
-    //
-    //==========================================================================
-    return bookOrAuthorArray.map((elem) => {
-	      const name = elem[0];
-	      const count = elem[1];
-	      const object = { name, count };
 
-	      return object;
-    });
-    //==========================================================================
-    //
-    //    Trying to generalize over comparing entries in one list vs
-    //     entries in two lists.
-    //
-    //    Above maps [ name, count] -> { name: name, count: count } ...
-    //     from within the same list
-    //
-    //    Below maps [ name, count ] -> { name: name, count: count } ...
-    //     but uses 'authorId' and 'id' as foreign keys in two
-    //     dissimilar lists.
-    //
-    //==========================================================================
-    return sortedEntriesArray.map((entry) => {
-	let object = {};
+
+    const mapBookArray = books.map((elem) => {
+	    const name = elem[0];
+	    const count = elem[1];
+	    const object = { name, count };
+	    
+	    return object;
+	});
+
+    
+   const mapAuthorArray =  books.map((entry) => {
+	let object = {}
 	authors.forEach(({ id, name: { first, last } }) => {
 	    const authorId = Number(entry[0]);
 	    const count = entry[1];
@@ -87,14 +74,19 @@ function _mapBookOrAuthorEntriesToObjects(bookOrAuthorArray) {
 	    }
 	});
 	return object;
-    });
-    //==========================================================================
+   });
+
+    if (authors.length === 0) {
+	return mapBookArray;
+    } else {
+	return mapAuthorArray;
+    }
 }
 
 function getMostCommonGenres(books) {
     // function(array) -> array
     // - consumes: booksArray
-    // - returns: popularGenres
+    // - returns: topFivePopularGenresArray
     const  genresByCountObject = books.reduce((acc, { genre }) => {
 	acc[genre]
 	    ? acc[genre] += 1
@@ -103,7 +95,7 @@ function getMostCommonGenres(books) {
     },{});
 
     const genresByCountArray = Object.entries(genresByCountObject);
-    const  sortedGenresByCountArray = _topFiveSortedBookOrAuthorEntriesArray(genresByCountArray);
+    const sortedGenresByCountArray = _topFiveSortedBookOrAuthorEntriesArray(genresByCountArray);
 
     return _mapBookOrAuthorEntriesToObjects(sortedGenresByCountArray);
 }
@@ -111,7 +103,7 @@ function getMostCommonGenres(books) {
 function getMostPopularBooks(books) {
     // function(array) -> array
     // - consumes: booksArray
-    // - returns: popularBooks
+    // - returns: topFivePopularBooksArray
     const borrowCountsByBookArray = books.reduce((acc, { title, borrows }) => {
 	const count = borrows.length;
 	const entry = [title,count];
@@ -119,59 +111,28 @@ function getMostPopularBooks(books) {
 	return acc;
     },[]);
     
-    const sortedEntriesArray = _topFiveSortedBookOrAuthorEntriesArray(borrowCountsByBookArray);
+    const sortedBorrowCountsByBookArray = _topFiveSortedBookOrAuthorEntriesArray(borrowCountsByBookArray);
 
-    return _mapBookOrAuthorEntriesToObjects(sortedEntriesArray);
+    return _mapBookOrAuthorEntriesToObjects(sortedBorrowCountsByBookArray);
 }
 
 function getMostPopularAuthors(books, authors) {
     // function(array, array) -> array
-    // - consumes: booksArray, authorsArray
-    // - returns: popularAuthors
-
-    // The following doesn't account for authors having multiple books
-    // authorId 20 in the book fixture as two books. The tests may be passing
-    // becasue my sort function is slicing off the duplicate entry
-    //
-    // const authorsByBorrowsArray = books.reduce((acc, { authorId, borrows }) => {
-    // 	const count = borrows.length;
-    // 	const entry = [authorId,count];
-    // 	acc.push(entry);
-    // 	return acc;
-    // },[]);
-
-    const  authorsByBorrowsObject = books.reduce((acc, { authorId, borrows }) => {
+    // - consumes: booksArray,authorsArray
+    // - returns: topFivePopularAuthorsArray
+    const authorsByBorrowsObject = books.reduce((acc, { authorId, borrows }) => {
 	const count = borrows.length
 	acc[authorId]
 	    ? acc[authorId] += count
 	    : acc[authorId] = count
 	return acc;
     },{});
-
-    const authorsByBorrowsArray = Object.entries(authorsByBorrowsObject);
-    console.log(authorsByBorrowsArray);
     
+    const authorsByBorrowsArray = Object.entries(authorsByBorrowsObject);
     const sortedEntriesArray = _topFiveSortedBookOrAuthorEntriesArray(authorsByBorrowsArray);
-    console.log(sortedEntriesArray);
 
-    return sortedEntriesArray.map((entry) => {
-	let object = {};
-	authors.forEach(({ id, name: { first, last } }) => {
-	    const authorId = Number(entry[0]);
-	    const count = entry[1];
-	    
-	    if (authorId === id) {
-		object.name =`${first} ${last}`;
-		object.count = count;
-		return object;
-	    }
-	});
-	return object;
-    });
+    return _mapBookOrAuthorEntriesToObjects(sortedEntriesArray, authors);
 }
-
-const test_getMostPopularAuthors = getMostPopularAuthors(books,authors);
-console.log(test_getMostPopularAuthors);
 
 module.exports = {
     getTotalBooksCount,
